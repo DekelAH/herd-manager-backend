@@ -1,3 +1,4 @@
+import path from 'node:path'
 import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
@@ -37,6 +38,17 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/sheep', sheepRoutes)
 app.use('/api/matching', matchingRoutes)
+
+// Serve frontend static files
+const publicPath = path.join(import.meta.dirname, '..', 'public')
+app.use(express.static(publicPath))
+
+// SPA catch-all: any non-API route serves index.html for React Router
+app.get(/^\/(?!api\/).*/, (_req, res, next) => {
+  res.sendFile(path.join(publicPath, 'index.html'), (err) => {
+    if (err) next()
+  })
+})
 
 // Error handling
 app.use(notFoundHandler)
