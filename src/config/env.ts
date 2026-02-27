@@ -18,8 +18,10 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env)
 
 if (!parsed.success) {
+  /* eslint-disable no-console */
   console.error('Invalid environment variables:')
   console.error(parsed.error.format())
+  /* eslint-enable no-console */
   process.exit(1)
 }
 
@@ -31,6 +33,7 @@ const mongoUri = data.NODE_ENV === 'production'
 
 if (!mongoUri) {
   const needed = data.NODE_ENV === 'production' ? 'MONGODB_ATLAS_URI' : 'MONGODB_URI'
+  // eslint-disable-next-line no-console
   console.error(`Missing ${needed} for ${data.NODE_ENV} environment`)
   process.exit(1)
 }

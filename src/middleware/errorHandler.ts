@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { env } from '../config/env.js'
 import { ApiError } from '../shared/utils/apiError.js'
+import logger from '../config/logger.js'
 
 interface ErrorWithStatus {
   statusCode?: number
@@ -18,13 +19,7 @@ export function errorHandler(
   const statusCode = err.statusCode || 500
   const message = err.message || 'Internal server error'
 
-  if (env.NODE_ENV === 'development') {
-    console.error('Error:', {
-      statusCode,
-      message,
-      stack: err.stack
-    })
-  }
+  logger.error(message, { statusCode, stack: err.stack })
 
   res.status(statusCode).json({
     status: 'error',

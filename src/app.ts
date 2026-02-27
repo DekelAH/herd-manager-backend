@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express'
 import { env } from './config/env.js'
 import { swaggerSpec } from './config/swagger.js'
 import { generalLimiter } from './middleware/rateLimiter.js'
+import { requestLogger } from './middleware/requestLogger.js'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js'
 
 import authRoutes from './modules/auth/auth.routes.js'
@@ -21,6 +22,7 @@ app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }))
 app.use(cookieParser())
 app.use(express.json({ limit: '10kb' }))
 app.use(generalLimiter)
+app.use(requestLogger)
 
 // API docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
