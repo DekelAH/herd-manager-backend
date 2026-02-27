@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import jwt from 'jsonwebtoken'
+import jwt, { SignOptions } from 'jsonwebtoken'
 import { env } from '../../config/env.js'
 import { User } from '../user/user.model.js'
 import { ApiError } from '../../shared/utils/apiError.js'
@@ -10,7 +10,7 @@ function generateAccessToken(userId: string): string {
   return jwt.sign(
     { userId } satisfies AuthPayload,
     env.JWT_ACCESS_SECRET,
-    { expiresIn: env.JWT_ACCESS_EXPIRES_IN, jwtid: crypto.randomUUID() }
+    { expiresIn: env.JWT_ACCESS_EXPIRES_IN, jwtid: crypto.randomUUID() } as SignOptions
   )
 }
 
@@ -18,7 +18,7 @@ function generateRefreshToken(userId: string): string {
   return jwt.sign(
     { userId } satisfies AuthPayload,
     env.JWT_REFRESH_SECRET,
-    { expiresIn: env.JWT_REFRESH_EXPIRES_IN, jwtid: crypto.randomUUID() }
+    { expiresIn: env.JWT_REFRESH_EXPIRES_IN, jwtid: crypto.randomUUID() } as SignOptions
   )
 }
 

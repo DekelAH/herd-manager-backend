@@ -1,5 +1,5 @@
 import { Types } from 'mongoose'
-import { Sheep, ISheep } from './sheep.model.js'
+import { Sheep } from './sheep.model.js'
 import { ApiError } from '../../shared/utils/apiError.js'
 import { CreateSheepInput, UpdateSheepInput, SheepQuery } from './sheep.validation.js'
 import { formatTagNumber } from './sheep.utils.js'
@@ -100,7 +100,7 @@ export async function updateSheep(
 
     const duplicate = await Sheep.findOne({
       owner: ownerObjectId,
-      tagNumber: updates.tagNumber,
+      tagNumber: updates.tagNumber as string,
       _id: { $ne: sheepId }
     })
 

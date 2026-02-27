@@ -5,7 +5,7 @@ import * as matchingService from './matching.service.js'
 export async function getValidMatches(req: AuthenticatedRequest, res: Response) {
   const matches = await matchingService.getValidMatches(
     req.user!.id,
-    req.params.sheepId
+    req.params.sheepId as string
   )
 
   res.status(200).json({

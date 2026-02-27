@@ -67,7 +67,7 @@ describe('Matching Module', () => {
         birthDate: '2019-01-01'
       })
 
-      const sister = await createTestSheep(accessToken, {
+      await createTestSheep(accessToken, {
         tagNumber: '81',
         gender: 'female',
         birthDate: '2022-03-01',

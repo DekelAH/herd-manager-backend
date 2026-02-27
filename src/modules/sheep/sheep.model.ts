@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document, Types } from 'mongoose'
+import mongoose, { Schema, Types } from 'mongoose'
 import { FERTILITY_RATINGS, HEALTH_STATUSES, GENDERS } from '../../shared/constants/index.js'
 
-export interface ISheep extends Document {
+export interface ISheep {
   _id: Types.ObjectId
   tagNumber: string
   gender: 'male' | 'female'

@@ -13,7 +13,7 @@ export async function getAllSheep(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function getSheepById(req: AuthenticatedRequest, res: Response) {
-  const sheep = await sheepService.getSheepById(req.user!.id, req.params.id)
+  const sheep = await sheepService.getSheepById(req.user!.id, req.params.id as string)
 
   res.status(200).json({
     status: 'success',
@@ -33,7 +33,7 @@ export async function createSheep(req: AuthenticatedRequest, res: Response) {
 export async function updateSheep(req: AuthenticatedRequest, res: Response) {
   const sheep = await sheepService.updateSheep(
     req.user!.id,
-    req.params.id,
+    req.params.id as string,
     req.body
   )
 
@@ -44,7 +44,7 @@ export async function updateSheep(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function deleteSheep(req: AuthenticatedRequest, res: Response) {
-  await sheepService.deleteSheep(req.user!.id, req.params.id)
+  await sheepService.deleteSheep(req.user!.id, req.params.id as string)
 
   res.status(200).json({
     status: 'success',
@@ -53,7 +53,7 @@ export async function deleteSheep(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function getSheepFamily(req: AuthenticatedRequest, res: Response) {
-  const family = await sheepService.getSheepFamily(req.user!.id, req.params.id)
+  const family = await sheepService.getSheepFamily(req.user!.id, req.params.id as string)
 
   res.status(200).json({
     status: 'success',
