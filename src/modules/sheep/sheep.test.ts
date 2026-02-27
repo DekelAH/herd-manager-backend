@@ -3,14 +3,14 @@ import { request, createTestUser, createTestSheep } from '../../../tests/helpers
 
 describe('Sheep Module', () => {
   describe('POST /api/sheep', () => {
-    it('should create a new sheep', async () => {
+    it('should create a new sheep with auto-prefixed tag', async () => {
       const { accessToken } = await createTestUser()
 
       const res = await request
         .post('/api/sheep')
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
-          tagNumber: 'SH001',
+          tagNumber: '1',
           gender: 'female',
           birthDate: '2022-03-15',
           weight: 65,
@@ -20,19 +20,39 @@ describe('Sheep Module', () => {
         })
 
       expect(res.status).toBe(201)
-      expect(res.body.data.sheep.tagNumber).toBe('SH001')
+      expect(res.body.data.sheep.tagNumber).toBe('F0001')
     })
 
-    it('should reject duplicate tag number for same owner', async () => {
+    it('should prefix male sheep with M', async () => {
       const { accessToken } = await createTestUser()
-      await createTestSheep(accessToken, { tagNumber: 'DUP001' })
 
       const res = await request
         .post('/api/sheep')
         .set('Authorization', `Bearer ${accessToken}`)
         .send({
-          tagNumber: 'DUP001',
+          tagNumber: '42',
           gender: 'male',
+          birthDate: '2021-06-01',
+          weight: 85,
+          breed: 'Assaf',
+          fertility: 'BB',
+          healthStatus: 'healthy'
+        })
+
+      expect(res.status).toBe(201)
+      expect(res.body.data.sheep.tagNumber).toBe('M0042')
+    })
+
+    it('should reject duplicate tag number for same owner', async () => {
+      const { accessToken } = await createTestUser()
+      await createTestSheep(accessToken, { tagNumber: '2', gender: 'female' })
+
+      const res = await request
+        .post('/api/sheep')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          tagNumber: '2',
+          gender: 'female',
           birthDate: '2022-01-01',
           weight: 80,
           breed: 'Assaf',
@@ -43,17 +63,38 @@ describe('Sheep Module', () => {
       expect(res.status).toBe(409)
     })
 
+    it('should allow same number for different genders', async () => {
+      const { accessToken } = await createTestUser()
+      await createTestSheep(accessToken, { tagNumber: '3', gender: 'female' })
+
+      const res = await request
+        .post('/api/sheep')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({
+          tagNumber: '3',
+          gender: 'male',
+          birthDate: '2022-01-01',
+          weight: 80,
+          breed: 'Assaf',
+          fertility: 'BB',
+          healthStatus: 'healthy'
+        })
+
+      expect(res.status).toBe(201)
+      expect(res.body.data.sheep.tagNumber).toBe('M0003')
+    })
+
     it('should allow same tag number for different owners', async () => {
       const user1 = await createTestUser({ username: 'owner1', email: 'o1@test.com' })
       const user2 = await createTestUser({ username: 'owner2', email: 'o2@test.com' })
 
-      await createTestSheep(user1.accessToken, { tagNumber: 'SHARED001' })
+      await createTestSheep(user1.accessToken, { tagNumber: '5' })
 
       const res = await request
         .post('/api/sheep')
         .set('Authorization', `Bearer ${user2.accessToken}`)
         .send({
-          tagNumber: 'SHARED001',
+          tagNumber: '5',
           gender: 'female',
           birthDate: '2022-03-15',
           weight: 65,
@@ -71,9 +112,9 @@ describe('Sheep Module', () => {
       const user1 = await createTestUser({ username: 'list1', email: 'l1@test.com' })
       const user2 = await createTestUser({ username: 'list2', email: 'l2@test.com' })
 
-      await createTestSheep(user1.accessToken, { tagNumber: 'U1-001' })
-      await createTestSheep(user1.accessToken, { tagNumber: 'U1-002' })
-      await createTestSheep(user2.accessToken, { tagNumber: 'U2-001' })
+      await createTestSheep(user1.accessToken, { tagNumber: '10' })
+      await createTestSheep(user1.accessToken, { tagNumber: '11' })
+      await createTestSheep(user2.accessToken, { tagNumber: '12' })
 
       const res1 = await request
         .get('/api/sheep')
@@ -93,8 +134,8 @@ describe('Sheep Module', () => {
     it('should filter by gender', async () => {
       const { accessToken } = await createTestUser()
 
-      await createTestSheep(accessToken, { tagNumber: 'F001', gender: 'female' })
-      await createTestSheep(accessToken, { tagNumber: 'M001', gender: 'male' })
+      await createTestSheep(accessToken, { tagNumber: '20', gender: 'female' })
+      await createTestSheep(accessToken, { tagNumber: '21', gender: 'male' })
 
       const res = await request
         .get('/api/sheep?gender=female')
@@ -108,11 +149,11 @@ describe('Sheep Module', () => {
     it('should search by tag number', async () => {
       const { accessToken } = await createTestUser()
 
-      await createTestSheep(accessToken, { tagNumber: 'ALPHA-01' })
-      await createTestSheep(accessToken, { tagNumber: 'BETA-01' })
+      await createTestSheep(accessToken, { tagNumber: '100', gender: 'female' })
+      await createTestSheep(accessToken, { tagNumber: '200', gender: 'female' })
 
       const res = await request
-        .get('/api/sheep?search=ALPHA')
+        .get('/api/sheep?search=0100')
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(res.status).toBe(200)
@@ -162,6 +203,21 @@ describe('Sheep Module', () => {
       expect(res.body.data.sheep.notes).toBe('Updated')
     })
 
+    it('should update tag prefix when gender changes', async () => {
+      const { accessToken } = await createTestUser()
+      const sheep = await createTestSheep(accessToken, { tagNumber: '30', gender: 'female' })
+
+      expect(sheep.tagNumber).toBe('F0030')
+
+      const res = await request
+        .put(`/api/sheep/${sheep._id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ gender: 'male' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.data.sheep.tagNumber).toBe('M0030')
+    })
+
     it('should not update another user\'s sheep', async () => {
       const user1 = await createTestUser({ username: 'upd1', email: 'u1@test.com' })
       const user2 = await createTestUser({ username: 'upd2', email: 'u2@test.com' })
@@ -199,13 +255,13 @@ describe('Sheep Module', () => {
       const { accessToken } = await createTestUser()
 
       const mother = await createTestSheep(accessToken, {
-        tagNumber: 'MOM001',
+        tagNumber: '40',
         gender: 'female',
         birthDate: '2020-01-01'
       })
 
       await createTestSheep(accessToken, {
-        tagNumber: 'BABY001',
+        tagNumber: '41',
         gender: 'female',
         birthDate: '2023-01-01',
         mother: mother._id
@@ -224,19 +280,19 @@ describe('Sheep Module', () => {
       const { accessToken } = await createTestUser()
 
       const mother = await createTestSheep(accessToken, {
-        tagNumber: 'FAM-MOM',
+        tagNumber: '50',
         gender: 'female',
         birthDate: '2020-01-01'
       })
 
       const father = await createTestSheep(accessToken, {
-        tagNumber: 'FAM-DAD',
+        tagNumber: '51',
         gender: 'male',
         birthDate: '2019-06-01'
       })
 
       const child = await createTestSheep(accessToken, {
-        tagNumber: 'FAM-CHILD',
+        tagNumber: '52',
         gender: 'female',
         birthDate: '2023-01-01',
         mother: mother._id,
@@ -248,8 +304,8 @@ describe('Sheep Module', () => {
         .set('Authorization', `Bearer ${accessToken}`)
 
       expect(res.status).toBe(200)
-      expect(res.body.data.mother.tagNumber).toBe('FAM-MOM')
-      expect(res.body.data.father.tagNumber).toBe('FAM-DAD')
+      expect(res.body.data.mother.tagNumber).toBe('F0050')
+      expect(res.body.data.father.tagNumber).toBe('M0051')
     })
   })
 })

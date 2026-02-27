@@ -7,14 +7,14 @@ describe('Matching Module', () => {
       const { accessToken } = await createTestUser()
 
       const male = await createTestSheep(accessToken, {
-        tagNumber: 'MATCH-M1',
+        tagNumber: '60',
         gender: 'male',
         birthDate: '2021-01-01',
         fertility: 'BB'
       })
 
       await createTestSheep(accessToken, {
-        tagNumber: 'MATCH-F1',
+        tagNumber: '61',
         gender: 'female',
         birthDate: '2021-06-01',
         fertility: 'BB'
@@ -33,14 +33,14 @@ describe('Matching Module', () => {
       const { accessToken } = await createTestUser()
 
       const mother = await createTestSheep(accessToken, {
-        tagNumber: 'BLK-MOM',
+        tagNumber: '70',
         gender: 'female',
         birthDate: '2020-01-01',
         fertility: 'BB'
       })
 
       const son = await createTestSheep(accessToken, {
-        tagNumber: 'BLK-SON',
+        tagNumber: '71',
         gender: 'male',
         birthDate: '2022-06-01',
         fertility: 'BB',
@@ -53,7 +53,7 @@ describe('Matching Module', () => {
 
       expect(res.status).toBe(200)
       const motherMatch = res.body.data.matches.find(
-        (m: { sheep: { tagNumber: string } }) => m.sheep.tagNumber === 'BLK-MOM'
+        (m: { sheep: { tagNumber: string } }) => m.sheep.tagNumber === 'F0070'
       )
       expect(motherMatch.isCompatible).toBe(false)
     })
@@ -62,13 +62,13 @@ describe('Matching Module', () => {
       const { accessToken } = await createTestUser()
 
       const mother = await createTestSheep(accessToken, {
-        tagNumber: 'SIB-MOM',
+        tagNumber: '80',
         gender: 'female',
         birthDate: '2019-01-01'
       })
 
       const sister = await createTestSheep(accessToken, {
-        tagNumber: 'SIB-SIS',
+        tagNumber: '81',
         gender: 'female',
         birthDate: '2022-03-01',
         fertility: 'BB',
@@ -76,7 +76,7 @@ describe('Matching Module', () => {
       })
 
       const brother = await createTestSheep(accessToken, {
-        tagNumber: 'SIB-BRO',
+        tagNumber: '82',
         gender: 'male',
         birthDate: '2022-03-01',
         fertility: 'BB',
@@ -89,7 +89,7 @@ describe('Matching Module', () => {
 
       expect(res.status).toBe(200)
       const sisterMatch = res.body.data.matches.find(
-        (m: { sheep: { tagNumber: string } }) => m.sheep.tagNumber === 'SIB-SIS'
+        (m: { sheep: { tagNumber: string } }) => m.sheep.tagNumber === 'F0081'
       )
       expect(sisterMatch.isCompatible).toBe(false)
     })
@@ -98,13 +98,13 @@ describe('Matching Module', () => {
       const { accessToken } = await createTestUser()
 
       const male = await createTestSheep(accessToken, {
-        tagNumber: 'PREG-M1',
+        tagNumber: '90',
         gender: 'male',
         birthDate: '2021-01-01'
       })
 
       await createTestSheep(accessToken, {
-        tagNumber: 'PREG-F1',
+        tagNumber: '91',
         gender: 'female',
         birthDate: '2021-06-01',
         isPregnant: true,
@@ -117,7 +117,7 @@ describe('Matching Module', () => {
 
       expect(res.status).toBe(200)
       const pregnantMatch = res.body.data.matches.find(
-        (m: { sheep: { tagNumber: string } }) => m.sheep.tagNumber === 'PREG-F1'
+        (m: { sheep: { tagNumber: string } }) => m.sheep.tagNumber === 'F0091'
       )
       expect(pregnantMatch).toBeUndefined()
     })
@@ -128,13 +128,13 @@ describe('Matching Module', () => {
       const { accessToken } = await createTestUser()
 
       await createTestSheep(accessToken, {
-        tagNumber: 'STAT-M1',
+        tagNumber: '100',
         gender: 'male',
         birthDate: '2021-01-01'
       })
 
       await createTestSheep(accessToken, {
-        tagNumber: 'STAT-F1',
+        tagNumber: '101',
         gender: 'female',
         birthDate: '2021-06-01'
       })
@@ -153,9 +153,9 @@ describe('Matching Module', () => {
       const user1 = await createTestUser({ username: 'stat1', email: 's1@test.com' })
       const user2 = await createTestUser({ username: 'stat2', email: 's2@test.com' })
 
-      await createTestSheep(user1.accessToken, { tagNumber: 'S1-M1', gender: 'male' })
-      await createTestSheep(user1.accessToken, { tagNumber: 'S1-F1', gender: 'female' })
-      await createTestSheep(user2.accessToken, { tagNumber: 'S2-M1', gender: 'male' })
+      await createTestSheep(user1.accessToken, { tagNumber: '110', gender: 'male' })
+      await createTestSheep(user1.accessToken, { tagNumber: '111', gender: 'female' })
+      await createTestSheep(user2.accessToken, { tagNumber: '112', gender: 'male' })
 
       const res = await request
         .get('/api/matching/stats')

@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { FERTILITY_RATINGS, HEALTH_STATUSES, GENDERS } from '../../shared/constants/index.js'
 
 export const createSheepSchema = z.object({
-  tagNumber: z.string().min(1).max(20).trim(),
+  tagNumber: z.string().regex(/^\d{1,4}$/, 'Tag number must be 1-4 digits'),
   gender: z.enum(GENDERS),
   birthDate: z.string().datetime({ offset: true }).or(z.string().date()),
   mother: z.string().nullable().optional(),

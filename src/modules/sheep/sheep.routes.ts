@@ -117,6 +117,9 @@ router.get(
  *             properties:
  *               tagNumber:
  *                 type: string
+ *                 pattern: '^\d{1,4}$'
+ *                 description: Numeric tag (1-4 digits). Auto-prefixed with F/M based on gender (e.g. 42 + female = F0042)
+ *                 example: "42"
  *               gender:
  *                 type: string
  *                 enum: [male, female]
@@ -149,7 +152,7 @@ router.get(
  *                 type: string
  *     responses:
  *       201:
- *         description: Sheep created
+ *         description: Sheep created (tagNumber stored as F/M + 4-digit padded number)
  *       409:
  *         description: Duplicate tag number
  */
@@ -180,8 +183,12 @@ router.post(
  *             properties:
  *               tagNumber:
  *                 type: string
+ *                 pattern: '^\d{1,4}$'
+ *                 description: Numeric tag (1-4 digits). Auto-prefixed with F/M based on gender
  *               gender:
  *                 type: string
+ *                 enum: [male, female]
+ *                 description: Changing gender also updates the tag prefix (F/M)
  *               birthDate:
  *                 type: string
  *               weight:

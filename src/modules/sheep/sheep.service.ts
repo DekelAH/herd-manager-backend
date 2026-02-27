@@ -2,6 +2,7 @@ import { Types } from 'mongoose'
 import { Sheep, ISheep } from './sheep.model.js'
 import { ApiError } from '../../shared/utils/apiError.js'
 import { CreateSheepInput, UpdateSheepInput, SheepQuery } from './sheep.validation.js'
+import { formatTagNumber } from './sheep.utils.js'
 
 export async function getAllSheep(ownerId: string, query: SheepQuery) {
   const filter: Record<string, unknown> = { owner: new Types.ObjectId(ownerId) }
@@ -52,10 +53,11 @@ export async function getSheepById(ownerId: string, sheepId: string) {
 
 export async function createSheep(ownerId: string, input: CreateSheepInput) {
   const ownerObjectId = new Types.ObjectId(ownerId)
+  const tagNumber = formatTagNumber(input.tagNumber, input.gender)
 
   const existing = await Sheep.findOne({
     owner: ownerObjectId,
-    tagNumber: input.tagNumber
+    tagNumber
   })
 
   if (existing) {
@@ -71,6 +73,7 @@ export async function createSheep(ownerId: string, input: CreateSheepInput) {
 
   const sheep = await Sheep.create({
     ...input,
+    tagNumber,
     owner: ownerObjectId
   })
 
@@ -83,11 +86,21 @@ export async function updateSheep(
   input: UpdateSheepInput
 ) {
   const ownerObjectId = new Types.ObjectId(ownerId)
+  const updates: Record<string, unknown> = { ...input }
 
-  if (input.tagNumber) {
+  if (input.tagNumber || input.gender) {
+    const current = await Sheep.findOne({ _id: sheepId, owner: ownerObjectId })
+    if (!current) {
+      throw ApiError.notFound('Sheep not found')
+    }
+
+    const effectiveGender = input.gender ?? current.gender
+    const rawTag = input.tagNumber ?? current.tagNumber.slice(1)
+    updates.tagNumber = formatTagNumber(rawTag, effectiveGender)
+
     const duplicate = await Sheep.findOne({
       owner: ownerObjectId,
-      tagNumber: input.tagNumber,
+      tagNumber: updates.tagNumber,
       _id: { $ne: sheepId }
     })
 
@@ -105,7 +118,7 @@ export async function updateSheep(
 
   const sheep = await Sheep.findOneAndUpdate(
     { _id: sheepId, owner: ownerObjectId },
-    { $set: input },
+    { $set: updates },
     { returnDocument: 'after', runValidators: true }
   )
 

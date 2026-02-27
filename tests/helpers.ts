@@ -25,7 +25,7 @@ export async function createTestSheep(
   overrides = {}
 ) {
   const sheepData = {
-    tagNumber: 'SH001',
+    tagNumber: '1',
     gender: 'female',
     birthDate: '2022-03-15',
     weight: 65,
