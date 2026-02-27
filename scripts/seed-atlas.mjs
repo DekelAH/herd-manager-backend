@@ -1,7 +1,12 @@
 import mongoose from 'mongoose'
 import bcrypt from 'bcrypt'
 
-const ATLAS_URI = 'mongodb+srv://dekelsProducts:ZgmTtzOchTKgEMJ6@dekelscluster.sxqmpwq.mongodb.net/herd-manager'
+const ATLAS_URI = process.env.MONGODB_ATLAS_URI
+if (!ATLAS_URI) {
+  console.error('Error: MONGODB_ATLAS_URI environment variable is not set')
+  console.error('Usage: MONGODB_ATLAS_URI="mongodb+srv://..." node scripts/seed-atlas.mjs')
+  process.exit(1)
+}
 
 await mongoose.connect(ATLAS_URI)
 console.log('Connected to Atlas')
