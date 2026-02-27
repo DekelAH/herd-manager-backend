@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
@@ -40,7 +41,8 @@ app.use('/api/sheep', sheepRoutes)
 app.use('/api/matching', matchingRoutes)
 
 // Serve frontend static files
-const publicPath = path.join(import.meta.dirname, '..', 'public')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const publicPath = path.join(__dirname, '..', 'public')
 app.use(express.static(publicPath))
 
 // SPA catch-all: any non-API route serves index.html for React Router
